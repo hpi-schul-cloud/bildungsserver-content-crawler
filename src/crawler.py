@@ -1,7 +1,7 @@
 from xml.etree.ElementTree import Element
 
-from api import LocalXmlFeed, TargetAPI
-from mappings import Mapping, LanguageMapping, LicenceMapping
+from .api import LocalXmlFeed, TargetAPI
+from .mappings import Mapping, LanguageMapping, LicenceMapping
 
 
 class Crawler:

@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+
+  bildungsserver-content-crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - default.env
+      - local.env

@@ -5,7 +5,7 @@ import requests
 from abc import ABC, abstractmethod
 from schul_cloud_resources_api_v1.schema import validate_resource
 
-import settings
+from . import settings
 
 
 class XmlFeed(ABC):
@@ -51,16 +51,16 @@ class TargetFormat(dict):
             self.attributes = attributes
 
     @property
-    def attributes(self):
+    def attributes(self) -> dict:
         return self['attributes']
 
     @attributes.setter
-    def attributes(self, attributes: dict):
+    def attributes(self, attributes: dict) -> dict:
         attributes['providerName'] = self.provider_name
         attributes['mimeType'] = self.mime_type
         attributes['contentCategory'] = self.content_category
         self["data"]["attributes"] = attributes
-        return self
+        return self["data"]["attributes"]
 
 
 class TargetAPI:
@@ -68,6 +68,7 @@ class TargetAPI:
     def __init__(self, base_url=settings.TARGET_URL) -> None:
         self.base_url = base_url
 
+    # TODO: We could use schul-cloud-resources-api-v1 to handle the api requests.
     def post(self, resource: dict):
         target_format = TargetFormat(attributes=resource)
         validate_resource(target_format.attributes)
