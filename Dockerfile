@@ -11,4 +11,4 @@ ADD data/ /app/data/
 
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT python -m bildungsserver-content-crawler.crawler
+ENTRYPOINT python -m bildungsserver-content-crawler.app

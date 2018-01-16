@@ -9,16 +9,25 @@ class Mapping:
 
 
 class LanguageMapping(Mapping):
+    # TODO: get mapping from settings?
     mapping = {
         "Deutsch": "de-de",
         "de": "de-de",
         "Englisch": "en-en",
+        "Spanisch": "es-es",
+        "Französisch": "fr-fr",
+        "Polnisch": "pt",
+        "Tschechisch": "cs",
+        "Bulgarisch": "bg",
+        "Italienisch": "it",
+        "Türkisch": "tr",
+        "Albanisch": "sq"
     }
 
     def transform(self, match):
         source_languages = match.split(';')
         try:
-            return [self.mapping[language] for language in source_languages]
+            return [self.mapping[language.strip()] for language in source_languages]
         except KeyError as e:
             raise ValueError('Could not map language {}'.format(e)) from e
 

@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element
 
-from .api import LocalXmlFeed, TargetAPI
+from .api import LocalXmlFeed, TargetAPI, HttpXmlFeed
 from .mappings import Mapping, LanguageMapping, LicenceMapping
 
 
@@ -36,12 +36,12 @@ class Crawler:
         for key in target_dict.keys():
             transformation = self.target_to_source_mapping[key]
             matches = element.findall(transformation.name)
+            # TODO: Some items don't have all required fields set. Options:
+            # - Set dummy here match if field is required.
+            # - Catch validation error and log the failing resource
+            # - Set default values in TargetFormat
             for match in matches:
                 # TODO: if multiple entries with the same tag exist, only the last is saved and posted to the target api
                 target_dict[key] = transformation.transform(match.text)
         return target_dict
 
-
-if __name__ == '__main__':
-    crawler = Crawler()
-    crawler.crawl()

@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element
 
 import requests
 from abc import ABC, abstractmethod
+from jsonschema import ValidationError
 from schul_cloud_resources_api_v1.schema import validate_resource
 
 from . import settings
@@ -71,6 +72,12 @@ class TargetAPI:
     # TODO: We could use schul-cloud-resources-api-v1 to handle the api requests.
     def post(self, resource: dict):
         target_format = TargetFormat(attributes=resource)
-        validate_resource(target_format.attributes)
-        request = requests.post(self.base_url, json=target_format)
-        request.raise_for_status()
+        try:
+            validate_resource(target_format.attributes)
+        except ValidationError as e:
+            # TODO: Logging
+            print(resource)
+            print(e)
+        else:
+            request = requests.post(self.base_url, json=target_format)
+            request.raise_for_status()
