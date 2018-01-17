@@ -5,7 +5,7 @@ services:
     depends_on:
       - resource-api-server
     environment:
-      TARGET_URL: http://resource-api-server:8080/v1/resources
+      TARGET_URL: http://resource-api-server:8080/v1
 
   resource-api-server:
     image: schulcloud/schul_cloud_resources_server_tests

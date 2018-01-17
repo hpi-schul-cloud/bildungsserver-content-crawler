@@ -28,7 +28,8 @@ class Crawler:
         feed = self.source_api.get_xml_feed()
         for child in feed:
             resource_dict = self.parse(child)
-            self.target_api.post(resource_dict)
+            self.target_api.add_resource(resource_dict)
+        self.target_api.finish_all_request()
 
     def parse(self, element: Element) -> dict:
         target_dict = {key: '' for key in self.target_to_source_mapping if
