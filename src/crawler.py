@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element
 
-from .api import LocalXmlFeed, TargetAPI, HttpXmlFeed
+from .api import LocalXmlFeed, ResourceAPI, HttpXmlFeed
 from .mappings import Mapping, LanguageMapping, LicenceMapping
 
 
@@ -8,19 +8,18 @@ class Crawler:
     target_to_source_mapping = {
         "title": Mapping("titel"),
         "url": Mapping("url_ressource"),
+        "originId": Mapping('id_local'),
         "description": Mapping("beschreibung"),
         "licenses": LicenceMapping("rechte"),
         "mimeType": None,
         "contentCategory": None,
-        "languages": LanguageMapping("sprache"),
-        "tags": Mapping("schlagwort", lambda m: m.split(';')),
+        # "languages": LanguageMapping("sprache"),
+        "tags": Mapping("schlagwort", lambda m: [w.strip() for w in m.split(';')]),
         "thumbnail": None,
-        "dimensions": None,
-        "duration": None,
         "providerName": None,
     }
 
-    def __init__(self, source_api=LocalXmlFeed, target_api=TargetAPI) -> None:
+    def __init__(self, source_api=LocalXmlFeed, target_api=ResourceAPI) -> None:
         self.source_api = source_api()
         self.target_api = target_api()
 
@@ -29,7 +28,7 @@ class Crawler:
         for child in feed:
             resource_dict = self.parse(child)
             self.target_api.add_resource(resource_dict)
-        self.target_api.finish_all_request()
+        # self.target_api.finish_all_request()
 
     def parse(self, element: Element) -> dict:
         target_dict = {key: '' for key in self.target_to_source_mapping if

@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type":"object",
+
+  "required": [
+    "originId",
+    "title",
+    "description",
+    "url",
+    "contentCategory",
+    "mimeType",
+    "licenses"
+  ],
+  "properties": {
+
+    "originId": {
+      "type": "string"
+    },
+
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "url": {
+      "$ref": "#/definitions/URL"
+    },
+    "contentCategory": {
+      "$ref": "#/definitions/ContentCategory"
+    },
+    "mimeType": {
+      "type": "string"
+    },
+
+    "licenses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+
+
+  },
+  "definitions": {
+    "URL":{
+      "type": "string",
+      "pattern": "^https?://.+$"
+    },
+    "ContentCategory":{
+      "enum": ["atomic", "learning-object", "proven-learning-object", "tool"]
+    }
+  }
+}

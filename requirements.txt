@@ -4,6 +4,5 @@ idna==2.6
 jsonschema==2.6.0
 python-dateutil==2.6.1
 requests==2.18.4
-schul-cloud-resources-api-v1==1.0.0.326
 six==1.11.0
 urllib3==1.22

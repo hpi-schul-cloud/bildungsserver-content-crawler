@@ -5,7 +5,7 @@
 
 ### Configuration 
 Configuration uses environment variables found in `src/settings.py`.
-For docker your can use `local.env` to overwrite the environment variables. `local.env` is ignored by `git`.
+For docker you can use `local.env` to overwrite the environment variables. `local.env` is ignored by `git`.
 For local usage, no configuration should be necessary.
 
 ## Run crawler and resource-api server in docker

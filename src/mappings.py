@@ -34,7 +34,4 @@ class LanguageMapping(Mapping):
 
 class LicenceMapping(Mapping):
     def transform(self, match):
-        return [{
-            "value": match,
-            'copyrighted': True
-        }]
+        return [match]
