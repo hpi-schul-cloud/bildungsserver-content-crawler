@@ -10,11 +10,11 @@ class Crawler:
         "url": Mapping("url_ressource"),
         "originId": Mapping('id_local'),
         "description": Mapping("beschreibung"),
-        "licenses": LicenceMapping("rechte"),
+        "licenses": Mapping("rechte", lambda m: m),
         "mimeType": None,
         "contentCategory": None,
         # "languages": LanguageMapping("sprache"),
-        "tags": Mapping("schlagwort", lambda m: [w.strip() for w in m.split(';')]),
+        "tags": Mapping("schlagwort", lambda m: [w.strip() for w in m[0].split(';')]),
         "thumbnail": None,
         "providerName": None,
     }
@@ -28,7 +28,6 @@ class Crawler:
         for child in feed:
             resource_dict = self.parse(child)
             self.target_api.add_resource(resource_dict)
-        # self.target_api.finish_all_request()
 
     def parse(self, element: Element) -> dict:
         target_dict = {key: '' for key in self.target_to_source_mapping if
@@ -36,12 +35,25 @@ class Crawler:
         for key in target_dict.keys():
             transformation = self.target_to_source_mapping[key]
             matches = element.findall(transformation.name)
-            # TODO: Some items don't have all required fields set. Options:
+            # TODO: Some items don't have all required fields set. Currently, the error is printed to stdout. Options:
             # - Set dummy here match if field is required.
             # - Catch validation error and log the failing resource
             # - Set default values in TargetFormat
-            for match in matches:
-                # TODO: if multiple entries with the same tag exist, only the last is saved and posted to the target api
-                target_dict[key] = transformation.transform(match.text)
+            if matches:
+                target_dict[key] = transformation.transform([match.text for match in matches])
         return target_dict
 
+
+class SiemensCrawler(Crawler):
+    target_to_source_mapping = {
+        "title": Mapping("title"),
+        "url": Mapping("link"),
+        "originId": Mapping('guid'),
+        "description": Mapping("description"),
+        "licenses": None,
+        "mimeType": None,
+        "contentCategory": None,
+        "tags": Mapping("category"),
+        "thumbnail": None,
+        "providerName": None,
+    }

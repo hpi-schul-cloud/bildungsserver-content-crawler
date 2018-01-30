@@ -39,6 +39,13 @@ class LocalXmlFeed(XmlFeed):
         return xml_tree.getroot()
 
 
+class LocalRssFeed(LocalXmlFeed):
+
+    def get_xml_feed(self):
+        feed = super(LocalRssFeed, self).get_xml_feed()
+        return feed.find('channel').iterfind('item')
+
+
 class ResourceSchema(dict):
 
     provider_name = "Bildungsserver Elixier"
@@ -50,6 +57,8 @@ class ResourceSchema(dict):
         self.__setitem__('mimeType', self.mime_type)
         self.__setitem__('contentCategory', self.content_category)
         self.__setitem__('providerName', self.provider_name)
+        if kwargs.get('licenses', None) is None:
+            self.__setitem__('licenses', [''])
 
 
 class ResourceAPI:

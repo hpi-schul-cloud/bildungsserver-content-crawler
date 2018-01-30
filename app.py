@@ -1,6 +1,6 @@
-from src.api import HttpXmlFeed, LocalXmlFeed
-from src.crawler import Crawler
+from src.api import HttpXmlFeed, LocalXmlFeed, LocalRssFeed
+from src.crawler import Crawler, SiemensCrawler
 
 if __name__ == '__main__':
-    crawler = Crawler(LocalXmlFeed)
+    crawler = SiemensCrawler(LocalRssFeed)
     crawler.crawl()
