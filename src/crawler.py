@@ -94,6 +94,6 @@ class SiemensCrawler(Crawler):
         "mimeType": None,
         "contentCategory": None,
         "tags": Mapping("category"),
-        "thumbnail": None,
+        "thumbnail": Mapping('enclosure', lambda m: m.get('url')),
         "providerName": None,
     }
