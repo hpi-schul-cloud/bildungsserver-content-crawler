@@ -1,4 +1,5 @@
 import json
+import logging
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
@@ -6,27 +7,18 @@ import jsonschema
 import os
 import requests
 from abc import ABC, abstractmethod
-from jsonschema import ValidationError
 from requests import HTTPError
 
+from src.exceptions import ConfigurationError
 from . import settings
 
 
 class XmlFeed(ABC):
+    base_url = settings.XML_LOCATION
+
     @abstractmethod
     def get_xml_feed(self) -> Element:
         ...
-
-
-class HttpXmlFeed(XmlFeed):
-
-    def __init__(self, base_url=settings.XML_LOCATION) -> None:
-        self.base_url = base_url
-
-    def get_xml_feed(self) -> Element:
-        request = requests.get(self.base_url)
-        request.raise_for_status()
-        return ET.fromstring(request.text)
 
 
 class LocalXmlFeed(XmlFeed):
@@ -39,6 +31,15 @@ class LocalXmlFeed(XmlFeed):
         return xml_tree.getroot()
 
 
+class BildungsserverFeed(XmlFeed):
+    base_url = 'http://www.bildungsserver.de/elixier/export.xml'
+
+    def get_xml_feed(self) -> Element:
+        request = requests.get(self.base_url)
+        request.raise_for_status()
+        return ET.fromstring(request.text)
+
+
 class LocalRssFeed(LocalXmlFeed):
 
     def get_xml_feed(self):
@@ -46,28 +47,20 @@ class LocalRssFeed(LocalXmlFeed):
         return feed.find('channel').iterfind('item')
 
 
-class ResourceSchema(dict):
+class SiemensStiftungFeed(BildungsserverFeed):
+    base_url = 'https://medienportal.siemens-stiftung.org/custom/api/rss2feed.php?maxage=0&lang=de'
 
-    provider_name = "Bildungsserver Elixier"
-    mime_type = 'text/html'
-    content_category = 'learning-object'
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.__setitem__('mimeType', self.mime_type)
-        self.__setitem__('contentCategory', self.content_category)
-        self.__setitem__('providerName', self.provider_name)
-        if kwargs.get('licenses', None) is None:
-            self.__setitem__('licenses', [''])
+    def get_xml_feed(self):
+        feed = super(SiemensStiftungFeed, self).get_xml_feed()
+        return feed.find('channel').iterfind('item')
 
 
 class ResourceAPI:
-
     schema = 'schema/resource-schema.json'
 
     def __init__(self, base_url=settings.TARGET_URL) -> None:
+        self.logger = logging.getLogger('resourceAPI')
         self.base_url = base_url
-        self.threads = []
         schema_path = os.path.join(os.path.dirname(__file__), self.schema)
         self.resource_schema = json.load(open(schema_path))
 
@@ -77,26 +70,19 @@ class ResourceAPI:
     @property
     def auth(self):
         if settings.BASIC_AUTH_USER and settings.BASIC_AUTH_PASSWORD:
-            return (settings.BASIC_AUTH_USER, settings.BASIC_AUTH_PASSWORD, )
+            return (settings.BASIC_AUTH_USER, settings.BASIC_AUTH_PASSWORD,)
+        else:
+            raise ConfigurationError("settings.BASIC_AUTH_USER and settings.BASIC_AUTH_PASSWORD must be set.")
 
-    def log_request(self, response):
-        print('Request finished', response)
-
-    def log(self, error):
-        # TODO: Logging
-        print(error)
+    def log(self, message):
+        self.logger.error(message)
 
     def add_resource(self, resource: dict):
-        target_format = ResourceSchema(**resource)
         try:
-            self.validate(target_format)
-        except ValidationError as e:
-            self.log(e)
-            return None
-
-        try:
-            # TODO: use auth from settings
-            request = requests.post(self.base_url, json=target_format, auth=self.auth)
+            request = requests.post(self.base_url, json=resource, auth=self.auth)
             request.raise_for_status()
         except HTTPError as e:
+            self.log("{} {} ".format(e, e.response.content))
+        except ConnectionError as e:
             self.log(e)
+            raise e
