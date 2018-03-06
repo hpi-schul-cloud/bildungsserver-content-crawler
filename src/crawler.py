@@ -50,7 +50,7 @@ class Crawler:
             transformation = self.target_to_source_mapping[key]
             matches = element.findall(transformation.name)
             if matches:
-                target_dict[key] = transformation.transform([match.text for match in matches])
+                target_dict[key] = transformation.transform([match for match in matches])
         return target_dict
 
     def validate(self, resource_dict):
@@ -72,10 +72,10 @@ class BildungsserverCrawler(Crawler):
         "url": Mapping("url_ressource"),
         "originId": Mapping('id_local'),
         "description": Mapping("beschreibung"),
-        "licenses": Mapping("rechte", lambda m: m),
+        "licenses": Mapping("rechte", lambda m: [w.text for w in m]),
         "mimeType": None,
         "contentCategory": None,
-        "tags": Mapping("schlagwort", lambda m: [w.strip() for w in m[0].split(';')]),
+        "tags": Mapping("schlagwort", lambda m: [w.strip() for w in m[0].text.split(';')]),
         "thumbnail": None,
         "providerName": None,
     }
@@ -94,6 +94,6 @@ class SiemensCrawler(Crawler):
         "mimeType": None,
         "contentCategory": None,
         "tags": Mapping("category"),
-        "thumbnail": Mapping('enclosure', lambda m: m.get('url')),
+        "thumbnail": Mapping('enclosure', lambda m: [w.get('url') for w in m]),
         "providerName": None,
     }
