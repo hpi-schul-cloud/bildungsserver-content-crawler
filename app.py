@@ -12,6 +12,7 @@ if __name__ == '__main__':
         Crawler = SiemensCrawler
     else:
         raise ConfigurationError("settings.CRAWLER must be set.")
+    dry_run = settings.DRY_RUN
 
-    crawler = Crawler()
+    crawler = Crawler(dry_run=dry_run)
     crawler.crawl()

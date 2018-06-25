@@ -27,10 +27,11 @@ class Crawler:
     target_to_source_mapping = None
     source_api = None
 
-    def __init__(self, target_api=ResourceAPI) -> None:
+    def __init__(self, target_api=ResourceAPI, dry_run=True) -> None:
         self.logger = logging.getLogger(self.provider_name)
         self.source_api = self.source_api()
         self.target_api = target_api()
+        self.dry_run = dry_run
 
     def log(self, message):
         self.logger.error(message)
@@ -40,8 +41,10 @@ class Crawler:
         for child in feed:
             resource_dict = self.parse(child)
             resource = self.validate(resource_dict)
-            if resource:
+            if resource and not self.dry_run:
                 self.target_api.add_resource(resource)
+            elif resource:
+                self.log(resource)
 
     def parse(self, element: Element) -> dict:
         target_dict = {key: '' for key in self.target_to_source_mapping if
