@@ -36,6 +36,7 @@ class BildungsserverFeed(XmlFeed):
 
     def get_xml_feed(self) -> Element:
         request = requests.get(self.base_url)
+        request.encoding = 'utf-8'
         request.raise_for_status()
         return ET.fromstring(request.text)
 
