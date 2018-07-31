@@ -11,19 +11,20 @@ class ResourceSchema(dict):
     mime_type = 'text/html'
     content_category = 'learning-object'
 
-    def __init__(self, provider_name, **kwargs) -> None:
+    def __init__(self, provider_name, licenses, **kwargs) -> None:
         super().__init__(**kwargs)
         self.__setitem__('mimeType', self.mime_type)
         self.__setitem__('contentCategory', self.content_category)
         self.__setitem__('providerName', provider_name)
         # TODO: Empty licence is accepted by the resource api
         if kwargs.get('licenses', None) is None:
-            self.__setitem__('licenses', [''])
+            self.__setitem__('licenses', licenses)
 
 
 class Crawler:
 
     provider_name = None
+    licenses = None
     target_to_source_mapping = None
     source_api = None
 
@@ -57,7 +58,7 @@ class Crawler:
         return target_dict
 
     def validate(self, resource_dict):
-        target_format = ResourceSchema(self.provider_name, **resource_dict)
+        target_format = ResourceSchema(self.provider_name, self.licenses, **resource_dict)
         try:
             self.target_api.validate(target_format)
         except ValidationError as e:
@@ -86,6 +87,7 @@ class BildungsserverCrawler(Crawler):
 
 class SiemensCrawler(Crawler):
     provider_name = "Siemens-Stiftung"
+    licenses = ["© Siemens Stiftung 2018", '<a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode.de">lizenziert unter CC BY-SA 4.0 international</a>']
     source_api = SiemensStiftungFeed
 
     target_to_source_mapping = {
